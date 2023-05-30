@@ -1,20 +1,19 @@
 package com.uno.game;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Random;
+import java.util.Stack;
 
 import com.uno.game.enums.Color;
 import com.uno.game.enums.Value;
 
 public class Deck {
 
-	private Deque<Card> cards;
+	private Stack<Card> cards;
 	private int cardsInDeck;
 
 	public Deck() {
 		cardsInDeck = 0;
-		this.cards = new ArrayDeque<>();
+		this.cards = new Stack<>();
 	}
 
 	public void initializeDeck() {
@@ -23,52 +22,52 @@ public class Deck {
 		for (Color color : colors) {
 			if (color == Color.WILD)
 				continue;
-			cards.addLast(new Card(color, Value.ZERO));
+			cards.push(new Card(color, Value.ZERO));
 			cardsInDeck++;
 
 			Value[] values = Value.values();
 			for (Value value : values) {
-				if (value == Value.ZERO)
+				if (value == Value.ZERO || value == Value.NONE || value == Value.PLUS4)
 					continue;
 
-				cards.addLast(new Card(color, value));
+				cards.push(new Card(color, value));
 				cardsInDeck++;
-				cards.addLast(new Card(color, value));
+				cards.push(new Card(color, value));
 				cardsInDeck++;
 			}
 		}
 
-		for (int i = 0; i < 5; i++) {
-			cards.addLast(new Card(Color.WILD, Value.NONE));
-			cards.addLast(new Card(Color.WILD, Value.PLUS4));
+		for (int i = 0; i < 4; i++) {
+			cards.push(new Card(Color.WILD, Value.NONE));
+			cardsInDeck++;
+			cards.push(new Card(Color.WILD, Value.PLUS4));
+			cardsInDeck++;
 		}
-
+		
 	}
 
 	public void suffleCards() {
-		int suffleTimes = new Random().nextInt(100) + 50;
-		Card[] cardsArray = (Card[]) cards.toArray();
+		int suffleTimes = new Random().nextInt(500) + 500;
+		System.out.println("size : " + cards.size() + " "+ cardsInDeck);
 		for (int j = 0; j < suffleTimes; j++) {
-			int x = cardsInDeck;
-			int suffle = new Random().nextInt(x / 2);
-			
+			int x = cardsInDeck-1;
+			int suffle = new Random().nextInt(x / 3);
 			while(suffle < x) {
-				Card temp = cardsArray[suffle];
-				cardsArray[suffle] = cardsArray[x];
-				cardsArray[x] = temp;
-				suffle++;
+				Card temp = cards.get(x);
+				cards.set(x, cards.get(suffle));
+				cards.set(suffle, temp);
 				x--;
+				suffle++;
 			}
 		}
-
 	}
 
 	/* getter-setters */
-	public Deque<Card> getCards() {
+	public Stack<Card> getCards() {
 		return cards;
 	}
 
-	public void setCards(Deque<Card> cards) {
+	public void setCards(Stack<Card> cards) {
 		this.cards = cards;
 	}
 

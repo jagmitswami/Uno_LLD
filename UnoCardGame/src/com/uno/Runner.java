@@ -26,8 +26,13 @@ public class Runner {
 			System.out.println("Enter Player " + i + " Name : ");
 			String name = scanner.next();
 			
-			players.put(1, new Player(i, name));
+			players.put(i, new Player(i, name));
 		}
+		
+		System.out.println("_________________________");
+		System.out.println();
+		System.out.println("|   Total Cards : 108   |");
+		System.out.println("_________________________");
 		
 		try {
 			Game game = new Game(players);
@@ -35,6 +40,7 @@ public class Runner {
 			System.err.println(e.getMessage());
 		}
 		
+		scanner.close();
 	}
 	
 }

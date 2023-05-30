@@ -29,7 +29,7 @@ public class Game {
 		startGame();
 	}
 
-	private void startGame() throws InvalidCard {
+	private void startGame() throws InvalidCard {;
 		flippedDeck.suffleCards();
 		distributeCards();
 		showCards();
@@ -39,23 +39,23 @@ public class Game {
 		for (Map.Entry<Integer, Player> e : players.entrySet()) {
 			Player player = e.getValue();
 			LinkedList<Card> playerHand = player.getPlayerHand();
-			for (int i = 0; i < 8; i++) {
-				playerHand.add(flippedDeck.getCards().pollLast());
+			for (int i = 0; i < 7; i++) {
+				playerHand.add(flippedDeck.getCards().pop());
 				flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
 			}
 		}
 		/* one discarded card from flipped cards */
-		Card firstCard = flippedDeck.getCards().peekLast();
+		Card firstCard = flippedDeck.getCards().peek();
 		while (firstCard.getColor() == Color.WILD) {
 			flippedDeck.suffleCards();
-			firstCard = flippedDeck.getCards().peekLast();
+			firstCard = flippedDeck.getCards().peek();
 		}
 
-		discardedDeck.getCards().addLast(flippedDeck.getCards().pollLast());
+		discardedDeck.getCards().push(firstCard);
 		flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
 		discardedDeck.setCardsInDeck(discardedDeck.getCardsInDeck() + 1);
 
-		previousCard = discardedDeck.getCards().peekLast();
+		previousCard = discardedDeck.getCards().peek();
 		System.out.println("Card at the top : " + previousCard);
 
 		if (previousCard.getValue() == Value.REVERSE) {
@@ -67,12 +67,10 @@ public class Game {
 	}
 
 	public void showCards() throws InvalidCard {
-
+		
 		System.out.println("===============================================");
-
 		Player player = players.get(nextPlayer);
 		System.out.println("Turn : " + player);
-
 		LinkedList<Card> playerHand = player.getPlayerHand();
 
 		if (previousCard.getValue() == Value.PLUS2) {
@@ -145,6 +143,7 @@ public class Game {
 
 		findNextPlayer();
 
+		showCards();
 	}
 
 	private void chooseColor() {
@@ -186,7 +185,7 @@ public class Game {
 		Player player = players.get(nextPlayer);
 		LinkedList<Card> playerHand = player.getPlayerHand();
 		for (int i = 0; i < noOfCards; i++) {
-			playerHand.add(flippedDeck.getCards().pollLast());
+			playerHand.add(flippedDeck.getCards().pop());
 			flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
 		}
 	}
