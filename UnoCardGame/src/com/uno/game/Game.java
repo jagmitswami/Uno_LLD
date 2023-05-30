@@ -18,6 +18,8 @@ public class Game {
 	private int nextPlayer;
 	private boolean direction;
 
+	private boolean penalty;
+
 	public Game(Map<Integer, Player> players) throws InvalidCard {
 		this.flippedDeck = new Deck();
 		this.discardedDeck = new Deck();
@@ -25,11 +27,13 @@ public class Game {
 		this.players = players;
 		this.nextPlayer = 1;
 		this.direction = true;
+		this.penalty = false;
 		flippedDeck.initializeDeck();
 		startGame();
 	}
 
-	private void startGame() throws InvalidCard {;
+	private void startGame() throws InvalidCard {
+		;
 		flippedDeck.suffleCards();
 		distributeCards();
 		showCards();
@@ -39,7 +43,7 @@ public class Game {
 		for (Map.Entry<Integer, Player> e : players.entrySet()) {
 			Player player = e.getValue();
 			LinkedList<Card> playerHand = player.getPlayerHand();
-			for (int i = 0; i < 7; i++) {
+			for (int i = 0; i < 3; i++) {
 				playerHand.add(flippedDeck.getCards().pop());
 				flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
 			}
@@ -56,32 +60,30 @@ public class Game {
 		discardedDeck.setCardsInDeck(discardedDeck.getCardsInDeck() + 1);
 
 		previousCard = discardedDeck.getCards().peek();
-		System.out.println("Card at the top : " + previousCard);
 
 		if (previousCard.getValue() == Value.REVERSE) {
 			nextPlayer = players.size();
 			direction = false;
 		} else if (previousCard.getValue() == Value.SKIP)
 			nextPlayer++;
+		else if (previousCard.getValue() == Value.PLUS2) {
+			penalty = true;
+		}
 
 	}
 
-	public void showCards() throws InvalidCard {
-		
+	public void showCards() {
+
+		System.out.println("Card at the top : " + previousCard);
 		System.out.println("===============================================");
 		Player player = players.get(nextPlayer);
 		System.out.println("Turn : " + player);
 		LinkedList<Card> playerHand = player.getPlayerHand();
 
-		if (previousCard.getValue() == Value.PLUS2) {
-			takeCards(2);
-			System.out.println("Added 2 cards and Skipped turn!");
+		if (penalty) {
+			applyPenalty();
 			findNextPlayer();
-			return;
-		} else if (previousCard.getValue() == Value.PLUS4) {
-			takeCards(4);
-			System.out.println("Added 4 cards and Skipped turn!");
-			findNextPlayer();
+			showCards();
 			return;
 		}
 
@@ -96,15 +98,20 @@ public class Game {
 
 		if (suitableCards == 0) {
 			takeCards(1);
-			throw new InvalidCard("No suitable card found to play! Added One Card");
+			System.err.println("No suitable Card found to play! Added one Card and skipped turn!!");
+			findNextPlayer();
+			showCards();
+			return;
 		}
 
 		turn();
 
 	}
 
-	public void turn() throws InvalidCard {
+	
 
+	public void turn() {
+		
 		Player player = players.get(nextPlayer);
 		LinkedList<Card> playerHand = player.getPlayerHand();
 
@@ -113,22 +120,30 @@ public class Game {
 		int cardNo = scanner.nextInt();
 
 		if (cardNo > playerHand.size() || cardNo <= 0) {
-			throw new InvalidCard("Invalid Input : " + cardNo);
+			System.err.println("Invalid Input : " + cardNo);
+			turn();
 		}
 
 		Card card = playerHand.get(cardNo - 1);
 
 		if (!cardSuitability(card)) {
-			throw new InvalidCard("Invalid card selected : " + card);
+			System.err.println("Invalid card selected : " + card);
+			turn();
 		}
 
-		playerHand.remove(cardNo);
+		playerHand.remove(cardNo - 1);
 		discardedDeck.getCards().add(card);
 		discardedDeck.setCardsInDeck(discardedDeck.getCardsInDeck() + 1);
 
+		if(playerHand.isEmpty()) {
+			System.out.println("________________________________");
+			System.out.println();
+			System.out.println("|   Winner is : "+ player +"   |");
+			System.out.println("________________________________");
+			return;
+		}
+		
 		previousCard = card;
-
-		System.out.println("Card at the top : " + previousCard);
 
 		if (previousCard.getColor() == Color.WILD) {
 			chooseColor();
@@ -139,6 +154,8 @@ public class Game {
 				direction = false;
 			else
 				direction = true;
+		}else if (previousCard.getValue() == Value.PLUS2 || previousCard.getValue() == Value.PLUS4) {
+			penalty = true;
 		}
 
 		findNextPlayer();
@@ -163,8 +180,11 @@ public class Game {
 			previousCard.setColor(Color.BLUE);
 		} else if (color == 3) {
 			previousCard.setColor(Color.GREEN);
-		} else {
+		} else if (color == 4){
 			previousCard.setColor(Color.YELLOW);
+		} else {
+			System.err.println("Invalid Input : " + color);
+			chooseColor();
 		}
 
 	}
@@ -191,15 +211,27 @@ public class Game {
 	}
 
 	private void findNextPlayer() {
+		
 		if (direction == true) {
 			nextPlayer++;
-			if (nextPlayer == players.size())
+			if (nextPlayer > players.size())
 				nextPlayer = 1;
 		} else {
 			nextPlayer--;
 			if (nextPlayer == 0)
 				nextPlayer = players.size();
 		}
+	}
+	
+	private void applyPenalty() {
+		if (previousCard.getValue() == Value.PLUS2) {
+			takeCards(2);
+			System.err.println("Added 2 cards and Skipped turn!");
+		} else if (previousCard.getValue() == Value.PLUS4) {
+			takeCards(4);
+			System.err.println("Added 4 cards and Skipped turn!");
+		}
+		penalty = false;
 	}
 
 }
