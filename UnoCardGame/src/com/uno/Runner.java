@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import com.uno.game.Game;
 import com.uno.game.Player;
-import com.uno.game.exceptions.InvalidCard;
 
 public class Runner {
 
@@ -34,13 +33,10 @@ public class Runner {
 		System.out.println("|   Total Cards : 108   |");
 		System.out.println("_________________________");
 		
-		try {
-			Game game = new Game(players);
-		} catch (InvalidCard e) {
-			System.err.println(e.getMessage());
-		}
+		Game game = new Game(players);
 		
 		scanner.close();
+		
 	}
 	
 }

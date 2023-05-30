@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import com.uno.game.enums.Color;
 import com.uno.game.enums.Value;
-import com.uno.game.exceptions.InvalidCard;
 
 public class Game {
 
@@ -20,7 +19,7 @@ public class Game {
 
 	private boolean penalty;
 
-	public Game(Map<Integer, Player> players) throws InvalidCard {
+	public Game(Map<Integer, Player> players) {
 		this.flippedDeck = new Deck();
 		this.discardedDeck = new Deck();
 		this.previousCard = null;
@@ -32,8 +31,7 @@ public class Game {
 		startGame();
 	}
 
-	private void startGame() throws InvalidCard {
-		;
+	private void startGame() {
 		flippedDeck.suffleCards();
 		distributeCards();
 		showCards();
@@ -43,7 +41,7 @@ public class Game {
 		for (Map.Entry<Integer, Player> e : players.entrySet()) {
 			Player player = e.getValue();
 			LinkedList<Card> playerHand = player.getPlayerHand();
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 7; i++) {
 				playerHand.add(flippedDeck.getCards().pop());
 				flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
 			}
@@ -74,14 +72,16 @@ public class Game {
 
 	public void showCards() {
 
-		System.out.println("Card at the top : " + previousCard);
-		System.out.println("===============================================");
+		System.out.println("+--------------------------------------------------------------------+");
+		System.out.println("|	**Card at the top : " + previousCard + "**	  |");
+		
 		Player player = players.get(nextPlayer);
-		System.out.println("Turn : " + player);
+		System.out.println("|		  ***Turn : " + player + "***	  	  |");
 		LinkedList<Card> playerHand = player.getPlayerHand();
 
 		if (penalty) {
 			applyPenalty();
+			System.out.println("+--------------------------------------------------------------------+");
 			findNextPlayer();
 			showCards();
 			return;
@@ -98,7 +98,8 @@ public class Game {
 
 		if (suitableCards == 0) {
 			takeCards(1);
-			System.err.println("No suitable Card found to play! Added one Card and skipped turn!!");
+			System.out.println("No suitable Card found to play! Added one Card and skipped Turn!!");
+			System.out.println("+--------------------------------------------------------------------+");
 			findNextPlayer();
 			showCards();
 			return;
@@ -108,26 +109,24 @@ public class Game {
 
 	}
 
-	
-
 	public void turn() {
 		
 		Player player = players.get(nextPlayer);
 		LinkedList<Card> playerHand = player.getPlayerHand();
 
-		System.out.println("Enter Card Number to play [1-" + playerHand.size() + "] : ");
+		System.out.println("Enter Card number to play [1-" + playerHand.size() + "] : ");
 		Scanner scanner = new Scanner(System.in);
 		int cardNo = scanner.nextInt();
 
 		if (cardNo > playerHand.size() || cardNo <= 0) {
-			System.err.println("Invalid Input : " + cardNo);
+			System.err.println("Invalid input : " + cardNo);
 			turn();
 		}
 
 		Card card = playerHand.get(cardNo - 1);
 
 		if (!cardSuitability(card)) {
-			System.err.println("Invalid card selected : " + card);
+			System.err.println("Invalid Card selected : " + card);
 			turn();
 		}
 
@@ -136,10 +135,11 @@ public class Game {
 		discardedDeck.setCardsInDeck(discardedDeck.getCardsInDeck() + 1);
 
 		if(playerHand.isEmpty()) {
-			System.out.println("________________________________");
+			System.out.println("___________________________________________");
 			System.out.println();
 			System.out.println("|   Winner is : "+ player +"   |");
-			System.out.println("________________________________");
+			System.out.println("___________________________________________");
+			System.exit(0);
 			return;
 		}
 		
@@ -160,6 +160,7 @@ public class Game {
 
 		findNextPlayer();
 
+		System.out.println("+--------------------------------------------------------------------+");
 		showCards();
 	}
 
@@ -183,7 +184,7 @@ public class Game {
 		} else if (color == 4){
 			previousCard.setColor(Color.YELLOW);
 		} else {
-			System.err.println("Invalid Input : " + color);
+			System.err.println("Invalid input : " + color);
 			chooseColor();
 		}
 
@@ -202,6 +203,31 @@ public class Game {
 	}
 
 	private void takeCards(int noOfCards) {
+		
+		if(flippedDeck.getCards().size() < noOfCards) {
+			while(!flippedDeck.getCards().isEmpty()) {
+				discardedDeck.getCards().push(flippedDeck.getCards().pop());
+				flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
+				discardedDeck.setCardsInDeck(discardedDeck.getCardsInDeck() + 1);
+			}
+			flippedDeck = discardedDeck;
+			flippedDeck.suffleCards();
+			discardedDeck = new Deck();
+			
+			Card firstCard = flippedDeck.getCards().peek();
+			while (firstCard.getColor() == Color.WILD) {
+				flippedDeck.suffleCards();
+				firstCard = flippedDeck.getCards().peek();
+			}
+
+			discardedDeck.getCards().push(firstCard);
+			flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
+			discardedDeck.setCardsInDeck(discardedDeck.getCardsInDeck() + 1);
+
+			previousCard = discardedDeck.getCards().peek();
+			 
+		}
+		
 		Player player = players.get(nextPlayer);
 		LinkedList<Card> playerHand = player.getPlayerHand();
 		for (int i = 0; i < noOfCards; i++) {
@@ -226,10 +252,10 @@ public class Game {
 	private void applyPenalty() {
 		if (previousCard.getValue() == Value.PLUS2) {
 			takeCards(2);
-			System.err.println("Added 2 cards and Skipped turn!");
+			System.out.println("Added 2 Cards and skipped Turn!");
 		} else if (previousCard.getValue() == Value.PLUS4) {
 			takeCards(4);
-			System.err.println("Added 4 cards and Skipped turn!");
+			System.out.println("Added 4 Cards and skipped Turn!");
 		}
 		penalty = false;
 	}

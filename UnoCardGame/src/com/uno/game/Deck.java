@@ -48,7 +48,7 @@ public class Deck {
 
 	public void suffleCards() {
 		int suffleTimes = new Random().nextInt(500) + 500;
-		System.out.println("size : " + cards.size() + " "+ cardsInDeck);
+		
 		for (int j = 0; j < suffleTimes; j++) {
 			int x = cardsInDeck-1;
 			int suffle = new Random().nextInt(x / 3);
