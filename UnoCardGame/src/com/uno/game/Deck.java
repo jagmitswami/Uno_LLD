@@ -16,20 +16,24 @@ public class Deck {
 		this.cards = new Stack<>();
 	}
 
+	/*Total cards 108, to initialize deck and getting all cards for the game inside the deck*/
 	public void initializeDeck() {
 
 		Color[] colors = Color.values();
 		for (Color color : colors) {
 			if (color == Color.WILD)
 				continue;
+			
+			/*One card per color*/
 			cards.push(new Card(color, Value.ZERO));
 			cardsInDeck++;
 
 			Value[] values = Value.values();
 			for (Value value : values) {
-				if (value == Value.ZERO || value == Value.NONE || value == Value.PLUS4)
+				if (value == Value.ZERO || value == Value.NONE || value == Value.PLUS_4)
 					continue;
 
+				/*Two cards per color of each value (excluding above contioned)*/
 				cards.push(new Card(color, value));
 				cardsInDeck++;
 				cards.push(new Card(color, value));
@@ -37,16 +41,18 @@ public class Deck {
 			}
 		}
 
+		/*4+4 special (wild) cards per deck*/
 		for (int i = 0; i < 4; i++) {
 			cards.push(new Card(Color.WILD, Value.NONE));
 			cardsInDeck++;
-			cards.push(new Card(Color.WILD, Value.PLUS4));
+			cards.push(new Card(Color.WILD, Value.PLUS_4));
 			cardsInDeck++;
 		}
 		
 	}
 
-	public void suffleCards() {
+	/*Shuffling the cards*/
+	public void shuffleCards() {
 		int suffleTimes = new Random().nextInt(500) + 500;
 		
 		for (int j = 0; j < suffleTimes; j++) {
