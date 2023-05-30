@@ -61,11 +61,18 @@ public class Game {
 	/*To distribute the cards among the players and setting up the game*/
 	private void distributeCards() {
 		
-		/*Distributing 7 cards to each player*/
+		/*Distributing cards to each player*/
 		for (Map.Entry<Integer, Player> e : players.entrySet()) {
 			Player player = e.getValue();
 			LinkedList<Card> playerHand = player.getPlayerHand();
-			for (int i = 0; i < 7; i++) {
+			
+			int i = 0;
+			
+			/*To distribute according to the number of players*/
+			if(players.size() > 7) i = 2;
+			else if(players.size() > 4) i = 1;
+			
+			while(i++ < 7) {
 				playerHand.add(flippedDeck.getCards().pop());
 				flippedDeck.setCardsInDeck(flippedDeck.getCardsInDeck() - 1);
 			}
@@ -101,15 +108,16 @@ public class Game {
 	/*Showing up cards and performing up-front verification and automated play*/
 	public void showCards() {
 
-		System.out.println("+-------------------------------------------------------------------------------+");
-		System.out.println("|	**Card at the top : " + previousCard + "**	  		|");
+		printEndingLines();
+		System.out.println();
+		System.out.println("		**Card at the top : " + previousCard + "**		");
 		
 		/*Extracting current player*/
 		Player player = players.get(nextPlayer);
 		LinkedList<Card> playerHand = player.getPlayerHand();
 		
-		System.out.println("|		  ***Turn : " + player + "***	  	  		|");
-		System.out.println("         ____________________________________________________   ");
+		System.out.println("			***Turn : " + player + "***	  	  		");
+		System.out.println("		____________________________________________________");
 		System.out.println();
 
 		/*Checking if penalty(take cards from the flipped deck) is applicable to current player
@@ -128,7 +136,7 @@ public class Game {
 		int suitableCards = 0;
 		int cardNo = 1;
 		for (Card card : playerHand) {
-			System.out.println("	" +cardNo + " : " + card);
+			System.out.println("			" +cardNo + " : " + card);
 			cardNo++;
 			if (cardSuitability(card))
 				suitableCards++;
@@ -140,7 +148,7 @@ public class Game {
 		 * and skipping the turn*/
 		if (suitableCards == 0) {
 			takeCards(1);
-			System.out.println("	No suitable Card found to play! Added one Card and skipped Turn!!");
+			System.out.println("		No suitable Card found to play! Added one Card and skipped Turn!!");
 			
 			printEndingLines();
 			findNextPlayer();
@@ -162,13 +170,13 @@ public class Game {
 		LinkedList<Card> playerHand = player.getPlayerHand();
 
 		System.out.println();
-		System.out.println("Enter Card number to play [1-" + playerHand.size() + "] : ");
+		System.out.println("			#Enter Card number to play [1-" + playerHand.size() + "] : ");
 		
 		Scanner scanner = new Scanner(System.in);
 		int cardNo = scanner.nextInt();
 
 		if (cardNo > playerHand.size() || cardNo <= 0) {
-			System.err.println("	Invalid input : " + cardNo);
+			System.err.println("			Invalid input : " + cardNo);
 			turn();
 			return;
 		}
@@ -178,7 +186,7 @@ public class Game {
 
 		/*Verifying the compatibility of current card with the previously played card*/
 		if (!cardSuitability(card)) {
-			System.err.println("	Invalid Card selected! Top Card : " + previousCard);
+			System.err.println("			Invalid Card selected! Top Card : " + previousCard);
 			turn();
 			return;
 		}
@@ -190,10 +198,10 @@ public class Game {
 
 		/*Declaring winner if all cards have been spent*/
 		if(playerHand.isEmpty()) {
-			System.out.println("___________________________________________");
+			System.out.println("			___________________________________________");
 			System.out.println();
-			System.out.println("|   Winner is : "+ player +"   |");
-			System.out.println("___________________________________________");
+			System.out.println("|   		Winner is : "+ player +"   |");
+			System.out.println("			___________________________________________");
 			System.exit(0);
 			return;
 		}
@@ -210,10 +218,20 @@ public class Game {
 				direction = false;
 			else
 				direction = true;
+			
+			System.out.println("			=======================");
+			System.out.println("			 Game Direction changed!");
+			System.out.println("			=======================");
+			
 		}else if (previousCard.getValue() == Value.PLUS_2 || previousCard.getValue() == Value.PLUS_4) {
 			penalty = true;
 		}else if (previousCard.getValue() == Value.SKIP) {
 			findNextPlayer();
+			
+			System.out.println("			==========================================");
+			System.out.println("			 Skipped Turn of : " + players.get(nextPlayer));
+			System.out.println("			==========================================");
+			
 		}
 
 		findNextPlayer();
@@ -226,13 +244,14 @@ public class Game {
 	/*Choosing color after playing wild card*/
 	private void chooseColor() {
 
-		System.out.println("+======================+");
-		System.out.println("|Choose color [1-4] :	|");
-		System.out.println("|	1. RED		|");
-		System.out.println("|	2. BLUE		|");
-		System.out.println("|	3. GREEN	|");
-		System.out.println("|	4. YELLOW	|");
-
+		System.out.println("			+======================+");
+		System.out.println("			|Choose color [1-4] :	|");
+		System.out.println("			|	1. RED		|");
+		System.out.println("			|	2. BLUE		|");
+		System.out.println("			|	3. GREEN	|");
+		System.out.println("			|	4. YELLOW	|");
+		System.out.println("			+======================+");
+		
 		Scanner scanner = new Scanner(System.in);
 		int color = scanner.nextInt();
 
@@ -245,12 +264,11 @@ public class Game {
 		} else if (color == 4){
 			previousCard.setColor(Color.YELLOW);
 		} else {
-			System.err.println("Invalid input : " + color);
+			System.err.println("			Invalid input : " + color);
 			chooseColor();
 			return;
 		}
 		
-		System.out.println("+======================+");
 	}
 
 	/*To check the current card's compatibility with the previously played card*/
@@ -323,19 +341,19 @@ public class Game {
 	private void applyPenalty() {
 		if (previousCard.getValue() == Value.PLUS_2) {
 			takeCards(2);
-			System.out.println("	Added 2 Cards and skipped Turn!");
+			System.out.println("			Added 2 Cards and skipped Turn!");
 		} else if (previousCard.getValue() == Value.PLUS_4) {
 			takeCards(4);
-			System.out.println("	Added 4 Cards and skipped Turn!");
+			System.out.println("			Added 4 Cards and skipped Turn!");
 		}
 		penalty = false;
 	}
 
 	/*Just for UI, printing purpose*/
 	private void printEndingLines() {
-		System.out.println("|                                                                               |");
-		System.out.println("|                                                                               |");
+		System.out.println();
 		System.out.println("+-------------------------------------------------------------------------------+");
+		
 	}
 	
 }
