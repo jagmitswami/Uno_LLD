@@ -6,7 +6,7 @@ public class Player {
 
 	private int id;
 	private String name;
-	
+
 	private LinkedList<Card> playerHand;
 
 	public Player(int id, String name) {
@@ -43,5 +43,5 @@ public class Player {
 	public String toString() {
 		return "Player [id=" + id + ", name=" + name + "]";
 	}
-	
+
 }
